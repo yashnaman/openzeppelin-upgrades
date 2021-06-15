@@ -42,7 +42,9 @@ export function makeDeployProxy(hre: HardhatRuntimeEnvironment): DeployFunction 
     const requiredOpts = withValidationDefaults(opts);
     const { kind } = requiredOpts;
 
-    const { provider } = hre.network;
+    // const { provider } = hre.network;
+    const provider = ImplFactory.signer.provider;
+    //@ts-ignore
     const manifest = await Manifest.forNetwork(provider);
 
     if (kind === 'uups') {
@@ -67,6 +69,7 @@ export function makeDeployProxy(hre: HardhatRuntimeEnvironment): DeployFunction 
 
       case 'transparent': {
         const AdminFactory = await getProxyAdminFactory(hre, ImplFactory.signer);
+        //@ts-ignore
         const adminAddress = await fetchOrDeployAdmin(provider, () => deploy(AdminFactory));
         const TransparentUpgradeableProxyFactory = await getTransparentUpgradeableProxyFactory(hre, ImplFactory.signer);
         proxyDeployment = Object.assign(

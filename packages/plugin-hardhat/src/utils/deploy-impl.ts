@@ -23,7 +23,8 @@ export async function deployImpl(
   requiredOpts: Required<ValidationOptions>,
   proxyAddress?: string,
 ): Promise<string> {
-  const { provider } = hre.network;
+  // const { provider } = hre.network;
+  const provider = ImplFactory.signer.provider;
   const validations = await readValidations(hre);
   const unlinkedBytecode = getUnlinkedBytecode(validations, ImplFactory.bytecode);
   const version = getVersion(unlinkedBytecode, ImplFactory.bytecode);
@@ -31,12 +32,14 @@ export async function deployImpl(
   assertUpgradeSafe(validations, version, requiredOpts);
 
   if (proxyAddress !== undefined) {
+    //@ts-ignore
     const manifest = await Manifest.forNetwork(provider);
+    //@ts-ignore
     const currentImplAddress = await getImplementationAddress(provider, proxyAddress);
     const currentLayout = await getStorageLayoutForAddress(manifest, validations, currentImplAddress);
     assertStorageUpgradeSafe(currentLayout, layout, requiredOpts.unsafeAllowCustomTypes);
   }
-
+  //@ts-ignore
   return await fetchOrDeploy(version, provider, async () => {
     const deployment = await deploy(ImplFactory);
     return { ...deployment, layout };

@@ -26,10 +26,12 @@ export type UpgradeFunction = (
 
 export function makeUpgradeProxy(hre: HardhatRuntimeEnvironment): UpgradeFunction {
   return async function upgradeProxy(proxy, ImplFactory, opts: ValidationOptions = {}) {
-    const { provider } = hre.network;
+    // const { provider } = hre.network;
+    const provider = ImplFactory.signer.provider;
+
 
     const proxyAddress = getContractAddress(proxy);
-
+    //@ts-ignore
     await setProxyKind(provider, proxyAddress, opts);
 
     const upgradeTo = await getUpgrader(proxyAddress, ImplFactory.signer);
@@ -45,9 +47,11 @@ export function makeUpgradeProxy(hre: HardhatRuntimeEnvironment): UpgradeFunctio
   type Upgrader = (nextImpl: string) => Promise<ethers.providers.TransactionResponse>;
 
   async function getUpgrader(proxyAddress: string, signer: Signer): Promise<Upgrader> {
-    const { provider } = hre.network;
-
+    const provider = signer.provider;
+    // const { provider } = hre.network;
+    //@ts-ignore
     const adminAddress = await getAdminAddress(provider, proxyAddress);
+    //@ts-ignore
     const adminBytecode = await getCode(provider, adminAddress);
 
     if (adminBytecode === '0x') {
@@ -58,6 +62,7 @@ export function makeUpgradeProxy(hre: HardhatRuntimeEnvironment): UpgradeFunctio
       return nextImpl => proxy.upgradeTo(nextImpl);
     } else {
       // Admin contract: redirect upgrade call through it
+      //@ts-ignore
       const manifest = await Manifest.forNetwork(provider);
       const AdminFactory = await getProxyAdminFactory(hre, signer);
       const admin = AdminFactory.attach(adminAddress);
