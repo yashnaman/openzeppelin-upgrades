@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.0 (2021-06-29)
+
+- Add option `unsafeAllowRenames` to configure storage layout check to allow variable renaming.
+
 ## 1.7.6 (2021-05-25)
 
 - Fix recognition of value types in storage layouts.
